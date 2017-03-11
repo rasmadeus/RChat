@@ -1,0 +1,2 @@
+# RChat
+Qt based chat
