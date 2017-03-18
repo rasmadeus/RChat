@@ -1,8 +1,8 @@
 TEMPLATE = app
 
-DESTDIR = ../../../bin
+DESTDIR = ../../bin
 
-QT += gui widgets
+QT += widgets
 
 CONFIG += console c++14
 CONFIG -= app_bundle
