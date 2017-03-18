@@ -1,2 +1,2 @@
-# RChat
-Qt based chat
+# Chat
+boost::asio, Qt based chats
