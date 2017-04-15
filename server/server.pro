@@ -14,11 +14,15 @@ include(../boost.pri)
 
 HEADERS += \
     pch.h \
-    main_view.h
+    main_view.h \
+    server.h \
+    client.h
 
 SOURCES += \
     main.cpp \
-    main_view.cpp
+    main_view.cpp \
+    server.cpp \
+    client.cpp
 
 FORMS += \
     main_view.ui
