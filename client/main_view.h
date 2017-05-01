@@ -18,6 +18,7 @@ private:
     void disconnect_from_server();
     void show_info(const QString& msg);
     void show_error(const QString& msg);
+    void write_msg();
 
 private:
     Ui::MainView ui;

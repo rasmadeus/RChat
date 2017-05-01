@@ -14,6 +14,10 @@ public:
     ~MainView();
 
 private:
+    void show_info(const QString& msg);
+    void show_error(const QString& msg);
+
+private:
     Ui::MainView ui;
     boost::asio::io_service io_service;
     std::unique_ptr<boost::asio::io_service::work> work;

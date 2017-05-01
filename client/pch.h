@@ -1,5 +1,6 @@
 #ifndef PCH_H
 
+#include <deque>
 #include <thread>
 
 #include <boost/asio.hpp>

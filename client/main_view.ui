@@ -16,6 +16,13 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="mainLayout">
     <item>
+     <widget class="QLineEdit" name="msg">
+      <property name="maxLength">
+       <number>512</number>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QTextEdit" name="log">
       <property name="documentTitle">
        <string>Chat log</string>

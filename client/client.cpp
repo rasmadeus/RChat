@@ -1,53 +1,74 @@
 #include "client.h"
 
+
 Client::Client(boost::asio::io_service& io_service)
     : QObject{}
-    , io_service{io_service}
-    , socket{io_service}
+    , io_service(io_service)
+    , socket(io_service)
 {
 }
 
-void Client::connect(const std::string& server, const std::string& port)
+void Client::write(const chat_message& msg)
 {
-    emit info(tr("User request connect to [%1:%2]").arg(QString::fromStdString(server)).arg(QString::fromStdString(port)));
-    const auto endpoint_it = boost::asio::ip::tcp::resolver{io_service}.resolve({server, port});
-    boost::asio::async_connect(socket, endpoint_it, std::bind(&Client::on_connect, this, std::placeholders::_1, std::placeholders::_2));
+    boost::asio::async_write(socket, boost::asio::buffer(msg.data(), msg.length()), [this](boost::system::error_code ec, std::size_t length){
+        if (!ec)
+            emit info("Message was sent");
+    });
 }
 
-void Client::disconnect()
+void Client::open(const std::string& host, const std::string& port)
 {
-    emit info(tr("User request disconnect"));
-    io_service.post(std::bind(&Client::do_disconnect, this));
+    emit info(tr("Try to open socket"));
+    boost::asio::ip::tcp::resolver resolver{io_service};
+    do_connect(resolver.resolve({host, port}));
 }
 
-void Client::on_connect(const boost::system::error_code& ec, const boost::asio::ip::tcp::resolver::iterator& it)
+void Client::close()
 {
-    if (ec)
-    {
-        emit error(make_error(ec));
-    }
-    else
-    {
-        const auto endpoint = it->endpoint();
-        const auto address = QString::fromStdString(endpoint.address().to_string());
-        const unsigned short port = endpoint.port();
-        emit info(tr("Succesfully connected to: [%1:%2]").arg(address).arg(port));
-        emit connected();
-    }
+    emit info(tr("Try to close socket"));
+    io_service.post([this]{
+        socket.close();
+        emit info("Socket about to be closed");
+    });
 }
 
-void Client::do_disconnect()
+
+void Client::do_connect(boost::asio::ip::tcp::resolver::iterator endpoint_iterator)
 {
-    boost::system::error_code shutdown_ec;
-    socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, shutdown_ec);
-    if (shutdown_ec)
-        emit error(make_error(shutdown_ec));
-    socket.close();
-    emit info(tr("Disconnected"));
-    emit disconnected();
+    boost::asio::async_connect(socket, endpoint_iterator, [this](boost::system::error_code ec, boost::asio::ip::tcp::resolver::iterator){
+        if (!ec)
+        {
+            emit info(tr("Connected to server"));
+            do_read_header();
+        }
+    });
 }
 
-QString Client::make_error(const boost::system::error_code& ec) const
+void Client::do_read_header()
 {
-    return tr("Error happened: %1. Code: %2").arg(QString::fromStdString(ec.message())).arg(ec.value());
+    boost::asio::async_read(socket, boost::asio::buffer(read_msg.data(), chat_message::header_length), [this](boost::system::error_code ec, std::size_t length){
+        if (!ec && read_msg.decode_header())
+            do_read_body();
+        else
+        {
+            socket.close();
+            emit info("Socket about to be closed");
+        }
+    });
+}
+
+void Client::do_read_body()
+{
+    boost::asio::async_read(socket, boost::asio::buffer(read_msg.body(), read_msg.body_length()), [this](boost::system::error_code ec, std::size_t length){
+        if (!ec)
+        {
+            emit info(tr("Message came: %1").arg(QString::fromStdString(std::string{read_msg.body()})));
+            do_read_header();
+        }
+        else
+        {
+            emit info(tr("Error"));
+            socket.close();
+        }
+    });
 }

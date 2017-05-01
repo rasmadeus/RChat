@@ -9,10 +9,10 @@ MainView::MainView()
 {
     ui.setupUi(this);
 
-    connect(&client, &Client::info, this, &MainView::show_info);
-    connect(&client, &Client::error, this, &MainView::show_error);
     connect(ui.connectButton, &QPushButton::clicked, this, &MainView::connect_to_server);
     connect(ui.disconnectButton, &QPushButton::clicked, this, &MainView::disconnect_from_server);
+    connect(ui.msg, &QLineEdit::returnPressed, this, &MainView::write_msg);
+    connect(&client, &Client::info, this, &MainView::show_info);
 
     connectedState.assignProperty(ui.connectButton, "visible", "false");
     connectedState.assignProperty(ui.disconnectButton, "visible", "true");
@@ -37,12 +37,12 @@ MainView::~MainView()
 
 void MainView::connect_to_server()
 {
-    client.connect(ui.serverLineEdit->text().toStdString(), std::to_string(ui.portSpinBox->value()));
+    client.open(ui.serverLineEdit->text().toStdString(), std::to_string(ui.portSpinBox->value()));
 }
 
 void MainView::disconnect_from_server()
 {
-    client.disconnect();
+    client.close();
 }
 
 void MainView::show_info(const QString& msg)
@@ -55,4 +55,14 @@ void MainView::show_error(const QString& msg)
 {
     static const QString html{"<font color=\"red\">%1</font>"};
     ui.log->append(html.arg(msg));
+}
+
+void MainView::write_msg()
+{
+    chat_message chat_msg;
+    chat_msg.body_length(ui.msg->text().length());
+    std::memcpy(chat_msg.body(), ui.msg->text().toStdString().c_str(), chat_msg.body_length());
+    chat_msg.encode_header();
+    client.write(chat_msg);
+    ui.msg->clear();
 }
