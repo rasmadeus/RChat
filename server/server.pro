@@ -4,9 +4,7 @@ DESTDIR = ../../bin
 
 QT += widgets
 
-CONFIG += console c++14
-CONFIG -= app_bundle
-
+CONFIG += c++14
 CONFIG += precompile_header
 PRECOMPILED_HEADER = pch.h
 
@@ -14,16 +12,18 @@ include(../boost.pri)
 
 HEADERS += \
     pch.h \
-    main_view.h \
     server.h \
-    client.h \
+    session.h \
+    main_view.h \
+    room.h \
     message.h
 
 SOURCES += \
     main.cpp \
-    main_view.cpp \
     server.cpp \
-    client.cpp \
+    session.cpp \
+    main_view.cpp \
+    room.cpp \
     message.cpp
 
 FORMS += \

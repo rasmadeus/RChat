@@ -13,16 +13,9 @@ PRECOMPILED_HEADER = pch.h
 include(../boost.pri)
 
 HEADERS += \
-    pch.h \
-    main_view.h \
-    client.h \
-    message.h
+    pch.h
 
 SOURCES += \
-    main.cpp \
-    main_view.cpp \
-    client.cpp \
-    message.cpp
+    main.cpp
 
-FORMS += \
-    main_view.ui
+FORMS +=

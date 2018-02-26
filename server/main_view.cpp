@@ -1,30 +1,20 @@
 #include "main_view.h"
 
 MainView::MainView()
-    : QMainWindow{}
-    , work{new boost::asio::io_service::work{io_service}}
-    , io_service_runner{[this]{ io_service.run(); }}
-    , server{io_service, 3001}
+    : QMainWindow{ nullptr }
 {
-    ui.setupUi(this);
-    connect(&server, &Server::error, this, &MainView::show_error);
-    connect(&server, &Server::info, this, &MainView::show_info);
+    _ui.setupUi(this);
+
+    connect(_ui.startServerButton, &QPushButton::clicked, this, &MainView::startServer);
+    connect(_ui.stopServerButton, &QPushButton::clicked, this, &MainView::stopServer);
 }
 
-MainView::~MainView()
+void MainView::startServer()
 {
-    work.reset();
-    io_service_runner.join();
+
 }
 
-void MainView::show_info(const QString& msg)
+void MainView::stopServer()
 {
-    static const QString html{"<font color=\"green\">%1</font>"};
-    ui.log->append(html.arg(msg));
-}
 
-void MainView::show_error(const QString& msg)
-{
-    static const QString html{"<font color=\"red\">%1</font>"};
-    ui.log->append(html.arg(msg));
 }
